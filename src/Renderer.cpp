@@ -7,7 +7,7 @@
 #include <ctime>
 
 Renderer::Renderer(int width, int height)
-    : m_Width(width), m_Height(height), m_Layout(), m_WinSize(width, height)
+    : m_Width(width), m_Height(height), m_Layout(), m_WinSize(width, height), shouldUpdateTextureGPU(false)
 {
     glfwSwapInterval(1);
     std::srand(std::time({}));
@@ -68,8 +68,7 @@ void Renderer::SetPixel(int x, int y, Type type)
     {
         m_Data[offset + i] = c[i];
     }
-    glBindTexture(GL_TEXTURE_2D, m_Texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_Data);
+    shouldUpdateTextureGPU = true;
 }
 
 void Renderer::Draw()
@@ -79,6 +78,11 @@ void Renderer::Draw()
     glClearColor((float)C_GREY.R / 255, (float)C_GREY.G / 255, (float)C_GREY.B / 255, (float)C_GREY.A / 255);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    if(shouldUpdateTextureGPU)
+    {
+        UpdateTextureGPU();
+        shouldUpdateTextureGPU = false;
+    }
 
     m_Shader->Bind();
     glActiveTexture(GL_TEXTURE0);
@@ -184,4 +188,10 @@ glm::vec2 Renderer::GetTextureSize() const
 glm::vec2 Renderer::GetWindowSize() const
 {
     return m_WinSize;
+}
+
+void Renderer::UpdateTextureGPU() const
+{
+    glBindTexture(GL_TEXTURE_2D, m_Texture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_Data);
 }

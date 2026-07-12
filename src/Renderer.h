@@ -97,13 +97,18 @@ public:
     void Terminate();
     void SetKeyCallback(GLFWkeyfun func);
     void SetMouseButtonCallback(GLFWmousebuttonfun func);
-    Renderer(int width, int height);
+
     double GetMouseX() const;
     double GetMouseY() const;
+
     glm::vec2 GetTextureSize() const;
     glm::vec2 GetWindowSize() const;
+
+    Renderer(int width, int height);
     ~Renderer();
 private:
+    void UpdateTextureGPU() const;
+
     unsigned char *m_Data;
 
     int m_Width, m_Height;
@@ -118,4 +123,5 @@ private:
     glm::mat4 m_Proj;
     uint32_t m_Texture;
     double m_MouseX, m_MouseY;
+    bool shouldUpdateTextureGPU;
 };

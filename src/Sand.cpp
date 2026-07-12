@@ -23,7 +23,7 @@ PaintType paintType = P_OBSTACLE;
 
 void clear(std::shared_ptr<Renderer> renderer, bool firstTime);
 void evaluateMousePress(std::shared_ptr<Renderer> renderer);
-void clearObsacles(std::shared_ptr<Renderer> renderer);
+void clearObstacles(std::shared_ptr<Renderer> renderer);
 bool isMousePosValid(std::shared_ptr<Renderer> renderer);
 glm::vec2 getLocalMousePos(std::shared_ptr<Renderer> renderer);
 void drawBorders(std::shared_ptr<Renderer> renderer);
@@ -54,7 +54,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if(key == GLFW_KEY_C && action == GLFW_PRESS)
     {
         pause = true;
-        clearObsacles(renderer);
+        clearObstacles(renderer);
         pause = false;
     }
 
@@ -108,7 +108,10 @@ int main()
     while (!renderer->ShouldClose())
     {
         if(pause)
+        {
+            std::cout << "pause\n";
             continue;
+        }
 
         //input
         if(leftMousePressed)
@@ -139,10 +142,12 @@ void clear(std::shared_ptr<Renderer> renderer, bool firstTime)
     drawBorders(renderer);
 
     activePixels.clear();
+    spawnPoints.clear();
 }
 
-void clearObsacles(std::shared_ptr<Renderer> renderer)
+void clearObstacles(std::shared_ptr<Renderer> renderer)
 {
+    pause = true;
     for(int x = 0; x < WIDTH; x++)
     {
         for(int y = 0; y < WIDTH; y++)
@@ -166,7 +171,7 @@ void clearObsacles(std::shared_ptr<Renderer> renderer)
                 if(pixelBuffer[x][y-1].type == AIR || pixelBuffer[x-1][y-1].type == AIR || pixelBuffer[x][y-1].type == AIR)
                 {
                     pixelBuffer[x][y].sleep = false;
-                    activePixels.push_back(pixelBuffer[x][x]);
+                    activePixels.push_back(pixelBuffer[x][y]);
                     pixelBuffer[x][y].type = AIR;
                     renderer->SetPixel(x, y, AIR);
                 }
@@ -277,7 +282,6 @@ void drawBorders(std::shared_ptr<Renderer> renderer)
 
 void calculatePixels(std::shared_ptr<Renderer> renderer)
 {
-    std::cout << "calxc";
     //calculating pixels
     if(spawnPoints.size() == 0)
     {
