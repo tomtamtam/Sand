@@ -11,6 +11,8 @@ cd Sand
 mkdir build && cd build
 cmake ..
 make
+#optional:
+cp compile_commands.json ../
 ```
 ![Example](res/example.gif)
 ![Screenshot](res/screenshot.bmp)
