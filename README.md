@@ -20,7 +20,7 @@ Inside the build folder run
 ```bash
 ./sand
 ```
-Inside the window you can draw obstacles, sand-spawner, and sand directly, comparable to some app like paint. If you want to record your simulation, without using a third party tool, yout can render it into output/Recording${Date}/out.mp4/gif using the record feature. More information under **Shortcuts**
+Inside the window you can draw obstacles, sand-spawner, and sand directly, comparable to some app like paint. If you want to record your simulation, without using a third party tool, yout can render it into output/Recording${Date}/out.mp4/gif using the record feature. More information under **Shortcuts**. **IMPORTANT:** The Record feature is currently only avalible on Linux builds due to the ffmpeg implimentation.
 
 ## Shorcuts
 - **ESC**: Reset the entire scene
