@@ -7,7 +7,7 @@
 #include <ctime>
 
 Renderer::Renderer(int width, int height)
-    : m_Width(width), m_Height(height), m_Layout()
+    : m_Width(width), m_Height(height), m_Layout(), m_WinSize(width, height)
 {
     glfwSwapInterval(1);
     std::srand(std::time({}));
@@ -42,6 +42,7 @@ Renderer::Renderer(int width, int height)
             float s = (float)((width >= height)? height : width);
             self->m_Size = {s, s};
             glViewport(0, 0, width, height);
+            self->m_WinSize = {width, height};
         }
     );
 
@@ -52,6 +53,7 @@ Renderer::Renderer(int width, int height)
     }
 
     m_Proj = glm::ortho(0.0f, (float)m_Width, 0.0f, (float)m_Height, -1.0f, 1.0f);
+    glViewport(0.0f, 0.0f, m_Width, m_Height);
 }
 
 void Renderer::SetPixel(int x, int y, Type type)
@@ -73,6 +75,7 @@ void Renderer::SetPixel(int x, int y, Type type)
 void Renderer::Draw()
 {
     glfwPollEvents();
+    glfwGetCursorPos(m_Window, &m_MouseX, &m_MouseY);
     glClearColor((float)C_GREY.R / 255, (float)C_GREY.G / 255, (float)C_GREY.B / 255, (float)C_GREY.A / 255);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -141,7 +144,7 @@ Renderer::~Renderer()
     delete [] m_Data;
 }
 
-bool Renderer::ShouldClose()
+bool Renderer::ShouldClose() const
 {
     return glfwWindowShouldClose(m_Window);
 }
@@ -150,4 +153,35 @@ void Renderer::Terminate()
 {
     glfwDestroyWindow(m_Window);
     glfwTerminate();
+}
+
+void Renderer::SetKeyCallback(GLFWkeyfun func)
+{
+    glfwSetKeyCallback(m_Window, func);
+}
+
+
+void Renderer::SetMouseButtonCallback(GLFWmousebuttonfun func)
+{
+    glfwSetMouseButtonCallback(m_Window, func);
+}
+
+double Renderer::GetMouseX() const
+{
+    return m_MouseX;
+}
+
+double Renderer::GetMouseY() const
+{
+    return m_MouseY;
+}
+
+glm::vec2 Renderer::GetTextureSize() const
+{
+    return m_Size;
+}
+
+glm::vec2 Renderer::GetWindowSize() const
+{
+    return m_WinSize;
 }

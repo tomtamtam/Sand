@@ -65,7 +65,7 @@ struct Color
 const Color C_WHITE(255);
 const Color C_BACK(0);
 const Color C_SAND(236, 203, 100, 255);
-const Color C_GREY(85, 85, 85, 255);
+const Color C_GREY(25, 25, 25, 255);
 
 inline Color getColorVariation(Color c)
 {
@@ -93,9 +93,15 @@ public:
     void Draw();
     void SetPixel(int x, int y, Type type);
     void Init();
-    bool ShouldClose();
+    bool ShouldClose() const;
     void Terminate();
+    void SetKeyCallback(GLFWkeyfun func);
+    void SetMouseButtonCallback(GLFWmousebuttonfun func);
     Renderer(int width, int height);
+    double GetMouseX() const;
+    double GetMouseY() const;
+    glm::vec2 GetTextureSize() const;
+    glm::vec2 GetWindowSize() const;
     ~Renderer();
 private:
     unsigned char *m_Data;
@@ -103,6 +109,7 @@ private:
     int m_Width, m_Height;
     GLFWwindow *m_Window;
     glm::vec2 m_Size;
+    glm::vec2 m_WinSize;
 
     std::optional<VertexArray> m_Vao;
     std::optional<VertexBuffer> m_Vbo;
@@ -110,4 +117,5 @@ private:
     VertexBufferLayout m_Layout;
     glm::mat4 m_Proj;
     uint32_t m_Texture;
+    double m_MouseX, m_MouseY;
 };
