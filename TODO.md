@@ -1,0 +1,2 @@
+- Texture push optimization (only changed parts get updated)
+- Resizeable Canvas
