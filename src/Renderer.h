@@ -21,6 +21,12 @@ enum Type {
     OBSTACLE
 };
 
+enum OutputFormat
+{
+    MP4,
+    GIF
+};
+
 struct Color
 {
     int R, G, B, A;
@@ -104,10 +110,15 @@ public:
     glm::vec2 GetTextureSize() const;
     glm::vec2 GetWindowSize() const;
 
+    void StartRecording(OutputFormat format);
+    void StopRecording();
+    bool IsRecording() const;
+
     Renderer(int width, int height);
     ~Renderer();
 private:
     void UpdateTextureGPU() const;
+    void Record();
 
     unsigned char *m_Data;
 
@@ -123,5 +134,10 @@ private:
     glm::mat4 m_Proj;
     uint32_t m_Texture;
     double m_MouseX, m_MouseY;
-    bool shouldUpdateTextureGPU;
+    bool m_UpdateTextureGPU;
+
+    bool m_Recording;
+    std::string m_RecordingName;
+    uint64_t m_RecordingCount;
+    OutputFormat m_RecordingFormat;
 };

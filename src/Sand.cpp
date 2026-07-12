@@ -20,6 +20,7 @@ bool leftMousePressed = false;
 int penSize = 2;
 bool pause = false;
 PaintType paintType = P_OBSTACLE;
+OutputFormat recordingFormat = GIF;
 
 void clear(std::shared_ptr<Renderer> renderer, bool firstTime);
 void evaluateMousePress(std::shared_ptr<Renderer> renderer);
@@ -44,7 +45,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
        std::cout << "penSize: " << penSize << '\n';
     }
 
-    if(key == GLFW_KEY_R && action == GLFW_PRESS)
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
     {
         pause = true;
         clear(renderer, false);
@@ -71,6 +72,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if(key == GLFW_KEY_O && action == GLFW_PRESS)
     {
         paintType = P_OBSTACLE;
+    }
+
+    if(key == GLFW_KEY_G && action == GLFW_PRESS)
+    {
+        recordingFormat = GIF;
+    }
+
+    if(key == GLFW_KEY_V && action == GLFW_PRESS)
+    {
+        recordingFormat = MP4;
+    }
+
+    if(key == GLFW_KEY_R && action == GLFW_PRESS)
+    {
+        if(!renderer->IsRecording())
+            renderer->StartRecording(recordingFormat);
+        else
+            renderer->StopRecording();
     }
 }
 

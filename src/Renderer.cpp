@@ -1,13 +1,19 @@
 #include "Renderer.h"
 #include <GLFW/glfw3.h>
 #include <cassert>
+#include <cstdio>
+#include <filesystem>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <iostream>
 #include <glm/glm.hpp>
 #include <ctime>
+#include <string>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
 
 Renderer::Renderer(int width, int height)
-    : m_Width(width), m_Height(height), m_Layout(), m_WinSize(width, height), shouldUpdateTextureGPU(false)
+    : m_Width(width), m_Height(height), m_Layout(), m_WinSize(width, height), m_UpdateTextureGPU(false)
 {
     glfwSwapInterval(1);
     std::srand(std::time({}));
@@ -68,7 +74,7 @@ void Renderer::SetPixel(int x, int y, Type type)
     {
         m_Data[offset + i] = c[i];
     }
-    shouldUpdateTextureGPU = true;
+    m_UpdateTextureGPU = true;
 }
 
 void Renderer::Draw()
@@ -78,10 +84,10 @@ void Renderer::Draw()
     glClearColor((float)C_GREY.R / 255, (float)C_GREY.G / 255, (float)C_GREY.B / 255, (float)C_GREY.A / 255);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if(shouldUpdateTextureGPU)
+    if(m_UpdateTextureGPU)
     {
         UpdateTextureGPU();
-        shouldUpdateTextureGPU = false;
+        m_UpdateTextureGPU = false;
     }
 
     m_Shader->Bind();
@@ -97,6 +103,11 @@ void Renderer::Draw()
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
     glfwSwapBuffers(m_Window);
+
+    if(m_Recording)
+    {
+        Record();
+    }
 }
 
 void Renderer::Init()
@@ -194,4 +205,72 @@ void Renderer::UpdateTextureGPU() const
 {
     glBindTexture(GL_TEXTURE_2D, m_Texture);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, GL_RGBA, GL_UNSIGNED_BYTE, m_Data);
+}
+
+std::string getTime()
+{
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    auto str = oss.str();
+    return str;
+}
+
+void Renderer::StartRecording(OutputFormat format)
+{
+    m_RecordingFormat = format;
+    m_Recording = true;
+    m_RecordingCount = 0;
+    m_RecordingName = "Recording " + getTime();
+    std::filesystem::create_directories("./output/" + m_RecordingName);
+    std::cout << "Started Recording!\n";
+}
+
+void removeFilesN(const std::string& dir, const std::string &extension)
+{
+    for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+        if (entry.is_regular_file() && entry.path().extension() == extension) {
+            std::filesystem::remove(entry.path());
+        }
+    }
+}
+
+void Renderer::StopRecording()
+{
+    m_Recording = false;
+    std::cout << "Stopped Recording!\n";
+
+    std::string dir = "./output/" + m_RecordingName;
+    std::string cmd;
+
+    switch (m_RecordingFormat)
+    {
+    case MP4:
+        cmd = "ffmpeg -y -framerate 60 -i \"" + dir + "/%d.bmp\" "
+              "-c:v libx264 -pix_fmt yuv420p \"" + dir + "/out.mp4\"";
+        break;
+
+    case GIF:
+        cmd = "ffmpeg -y -framerate 60 -start_number 1 -i \"" + dir + "/%d.bmp\" "
+              "-loop 0 \"" + dir + "/out.gif\"";
+        break;
+    }
+
+    std::system(cmd.c_str());
+    removeFilesN(dir, ".bmp");
+}
+
+void Renderer::Record()
+{
+    std::string filename = "./output/" + m_RecordingName + "/" + std::to_string(m_RecordingCount) + ".bmp";
+    stbi_flip_vertically_on_write(1);
+    stbi_write_bmp(filename.c_str(), m_Width, m_Height, 4, m_Data);
+    m_RecordingCount ++;
+}
+
+bool Renderer::IsRecording() const
+{
+    return m_Recording;
 }
